@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="wallet-page">
+
+    <h1 class="page-title">Wallet</h1>
+
+    <div class="wallet-layout">
+
+        <!-- LEFT: Account info + send form -->
+        <div class="wallet-left">
+
+            <!-- Account Selector -->
+            <div class="form-card">
+                <h2 class="section-title">Select Account</h2>
+
+                <form method="GET" action="/wallet" id="accountSwitchForm">
+                    <div class="input-group">
+                        <label>From Address</label>
+                        <select name="address" class="input-select" onchange="document.getElementById('accountSwitchForm').submit()">
+                            {% for acc in accounts %}
+                            <option value="{{ acc.PublicAddress }}" {% if acc.PublicAddress == selected_address %}selected{% endif %}>
+                                {{ acc.PublicAddress[:20] }}... — {{ acc.balance }} BTC
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+
+                <div class="balance-display">
+                    <p class="balance-label">Current Balance</p>
+                    <h2 class="balance-amount">{{ balance }} BTC</h2>
+                    <p class="address-display">{{ selected_address }}</p>
+                </div>
+
+                <!-- Create New Wallet -->
+                <form method="POST" action="/create-wallet">
+                    <button type="submit" class="btn-secondary">+ Create New Wallet</button>
+                </form>
+            </div>
+
+            <!-- Send Transaction Form -->
+            <div class="form-card" style="margin-top: 1.5rem;">
+                <h2 class="section-title">Send Transaction</h2>
+
+                <form method="POST" action="/wallet">
+                    <!-- Keep selected address -->
+                    <input type="hidden" name="fromAddress" value="{{ selected_address }}">
+                    <input type="hidden" name="action" value="send">
+
+                    <div class="input-group">
+                        <label>To Address</label>
+                        <input type="text" name="toAddress" placeholder="Receiver's address" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Amount (BTC)</label>
+                        <input type="number" name="Amount" step="0.00000001" min="0.00000001" placeholder="e.g. 1.5" required>
+                    </div>
+
+                    <div class="fee-note">Transaction fee: 0.0001 BTC</div>
+
+                    {% if message %}
+                    <div class="message {{ status }}">
+                        {{ message }}
+                    </div>
+                    {% endif %}
+
+                    <button type="submit" class="btn-primary">Send Transaction</button>
+                </form>
+            </div>
+
+        </div>
+
+        <!-- RIGHT: Transaction History -->
+        <div class="wallet-right">
+            <div class="form-card">
+                <h2 class="section-title">Transaction History</h2>
+
+                {% if tx_history %}
+                <div class="tx-list">
+                    {% for tx in tx_history %}
+                    <div class="tx-item">
+                        <div class="tx-row">
+                            <span class="tx-label">Block</span>
+                            <span class="tx-value">#{{ tx.block_height }}</span>
+                        </div>
+                        <div class="tx-row">
+                            <span class="tx-label">TxID</span>
+                            <span class="tx-value small-text">{{ tx.txid[:30] }}...</span>
+                        </div>
+                        {% if tx.sent > 0 %}
+                        <div class="tx-row">
+                            <span class="tx-label">Sent</span>
+                            <span class="tx-value tx-sent">-{{ tx.sent }} BTC</span>
+                        </div>
+                        {% endif %}
+                        {% if tx.received > 0 %}
+                        <div class="tx-row">
+                            <span class="tx-label">Received</span>
+                            <span class="tx-value tx-received">+{{ tx.received }} BTC</span>
+                        </div>
+                        {% endif %}
+                        {% if tx.fee > 0 %}
+                        <div class="tx-row">
+                            <span class="tx-label">Fee</span>
+                            <span class="tx-value tx-fee">{{ tx.fee }} BTC</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="no-tx">No transactions yet for this address.</p>
+                {% endif %}
+
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

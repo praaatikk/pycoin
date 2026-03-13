@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1 class="page-title">Block Explorer</h1>
+
+<div class="explorer-container">
+
+    {% for block in blocks %}
+    <div class="block-card" onclick="window.location='/block/{{ block.Height }}'" style="cursor:pointer;">
+
+        <div class="block-header">
+            <span>Height: {{ block.Height }}</span>
+            <div>
+                <span class="badge">Txs: {{ block.Txcount }}</span>
+                {% if block.fee_btc > 0 %}
+                <span class="badge badge-fee">Fee: {{ "%.8f"|format(block.fee_btc) }} BTC</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="block-body">
+            <p><strong>Hash:</strong> {{ block.BlockHeader.blockHash }}</p>
+            <p><strong>Prev Hash:</strong> {{ block.BlockHeader.prevBlockHash }}</p>
+            <p><strong>Merkle Root:</strong> {{ block.BlockHeader.merkleRoot }}</p>
+            <p><strong>Nonce:</strong> {{ block.BlockHeader.nonce }}</p>
+            {% if block.fee_btc > 0 %}
+            <p><strong>Fee Collected:</strong> {{ "%.8f"|format(block.fee_btc) }} BTC</p>
+            {% endif %}
+        </div>
+
+    </div>
+    {% endfor %}
+
+</div>
+
+{% endblock %}
